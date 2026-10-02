@@ -7,8 +7,6 @@ import pandas as pd
 import requests
 import streamlit as st
 
-from docx_export import REQUIRED_COLUMNS, generate_catalogue, inventory_key
-
 DATA_DIR = Path(__file__).parent / "data"
 
 CATEGORIES = {
@@ -151,38 +149,3 @@ if numeros:
             file_name=f"images_{categorie.lower().replace(' ', '_')}.zip",
             mime="application/zip",
         )
-
-    # --- Étape 4 : catalogue Word (DOCX) ---
-    st.header("4. Générer un catalogue Word (DOCX)")
-
-    colonnes_manquantes = REQUIRED_COLUMNS - set(reference_df.columns)
-    if colonnes_manquantes:
-        st.info(
-            "Cette fonctionnalité n'est pour l'instant disponible que pour les CSV contenant "
-            "toutes les colonnes du catalogue complet (actuellement : Estampe). "
-            f"Colonnes manquantes pour « {categorie} » : {', '.join(sorted(colonnes_manquantes))}"
-        )
-    else:
-        lignes_par_numero = {
-            str(r[col_inv_ref]).strip(): r.to_dict() for _, r in reference_df.iterrows()
-        }
-        a_generer = []
-        for n in numeros:
-            row = lignes_par_numero.get(n)
-            if row:
-                row.setdefault("Inventory Number", row.get(col_inv_ref, n))
-                uuid_img = str(row.get(col_img_ref) or "").strip()
-                a_generer.append((row, uuid_img))
-        a_generer.sort(key=lambda item: inventory_key(item[0]))
-
-        st.write(f"{len(a_generer)} notice(s) sur {len(numeros)} trouvée(s) dans le CSV de référence.")
-
-        if a_generer and st.button("Générer le catalogue DOCX"):
-            with st.spinner("Génération du document (téléchargement des images inclus)..."):
-                buffer = generate_catalogue(a_generer)
-            st.download_button(
-                "⬇️ Télécharger le catalogue DOCX",
-                data=buffer,
-                file_name=f"catalogue_{categorie.lower().replace(' ', '_')}.docx",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            )
