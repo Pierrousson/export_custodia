@@ -74,7 +74,7 @@ st.success(f"{len(reference_df)} notices chargées pour « {categorie} ».")
 
 # --- Étape 2 : saisie des numéros d'inventaire ---
 st.header("2. Fournir les numéros d'inventaire")
-mode = st.radio("Méthode", ["Importer un CSV", "Coller une liste"])
+mode = st.radio("Méthode", ["Coller une liste", "Importer un CSV"])
 
 numeros = []
 
